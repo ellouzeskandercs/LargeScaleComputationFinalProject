@@ -1,0 +1,130 @@
+Slide 1 : 
+Hi everyone. My project was to to parallelize the Kmeans Algorithm using the MPI 
+Library. 
+Before getting started on the algorithm. Let's see what the algorithm is used for. 
+
+Slide 2 : 
+The problem is given a dataset we want to seperate it into K differents Clusters.
+This is done by generating K centroids and then assigning each point to the cluster
+of the nearest centroid. To have a good seperation, we want to minimize the cost function
+which is the sum of the distances between each point and the corresponding centroid.
+Oriniginally this minimization problem is an NP problem but the Kmeans algorithm gives a
+satistfying solution. In practice we may usually the Kmeans 5-10 times with
+diiferent initializations and select the best result.
+
+Slide 3 : 
+So let's see now the serial Kmeans Algorithm. In fact it is pretty simple : 
+first we generate K randim centroids
+Then we will assign each point to the cluster of the nearest centroid
+After we compute the new centroids wich are the barycenter of the points assigned to the corresponding clusters
+Finally we will repeat the two last steps until convergence of J. In practice, we consider
+J has converged when the difference betwen two steps is less than a fixed threshhold.
+This algorithm has a time complexity the number of steps multipled by K times N.
+
+Slide 4 : 
+This is the result using K means with K equal to 4 with a certain dataset as we 
+can see on this figure. 
+
+Slide 5 :
+Let's see now how can we parallelize this algorithm.
+
+Slide 6 : 
+The first step is very similar to the serial one, we will select random points as centroids. 
+But unlike the serial algorithm, at this step we will have K times P centroids.
+Then we assign each point to the cluster. But, for that each process must have the global centroids
+The third step is to compute the new centroids. this willl be detailed on the next slide.
+Finally, we can compute the cost by summing all the local cost. This can be done by recursive doubling. 
+
+Slide 7 :
+Let's now see can we compute the global centroids 
+Suppose we have 2 processes and both have already computed theirs local centroids. 
+Then the global centroid which is equal to the mean of the points of the cluster. 
+we can divide this sum into the sum in the cluster of the first process and the cluster of the second process
+and the global centroids is the average of the local centroids with correspond weights the number of point in 
+each local cluster. Therefore Ech process have to send both the centroid and the numbers of points in the cluster.
+
+Slide 8 : 
+and that's what the algorithm will look like if P is a power of 2. 
+
+Slide 9 : 
+We can then write the Parallel algorithm for K means
+We initialize the centroids. 
+Then we repeat until convergence of the cost these five steps : assigning the points to the clusters
+then we compute the local centroids and their weights and we use the previous algotihm to compute the 
+gloabl centroids. Finally we compute the global cost by adding all the local cost with recursive dobling.
+
+Slide 10 :
+And that's the first example using the Kmeans algorithms with K=4. This figure shows the result and 
+it's pretty satisfying. 
+
+Slide 11 :
+Let's now make a performance study of our paralellization : 
+
+Slide 12 : 
+First we can compute the computation time : Assingning points to clusters will have a computation time multiple of
+N/P times K. and same for computing the local centroids. Computing the local cost, is just a loop over all points so a 
+computation times multiple of N/P. Then computing the  global cost and global centroids have a computing time multiple
+of log(P) times K and log(P).
+
+Slide 13 :
+Then we compute the communication time : for the first recursive doubling we have a size of 2K and the second one have a size 
+of 1. Therefore the execution time is equal to this very long formula. and in the case where N and P are very big the execution time
+willl be a multiple of the number of steps multiplied by N times K divied byP plus K times log(P)
+
+Slide 14 :
+Based on the execution time we can also compute the speedup which may be expressed as the quotient of P by 1 plus A times log(P)
+The result shows that if P is fixed increasing N will decrease the speedup and if N is fixed the speedup will get worse if P becomes 
+too large.
+
+Slide 15 :
+Let's now see the experimental result : 
+
+Slide 16 : 
+First we try to visualize rhe performance of our paralllelization on a big dataset 
+
+Slide 16 : 
+The figure shows the speedup in function of the number of processes. We can see that the curve accelerates quickly at the beginning but gradually 
+begins to .... and after P = 32 the speedup seems to stagnate. 
+
+Slide 17 : 
+Let's now run the parallel algorithm with N not too big. In this experiment we run our 
+algorithm for N=1000, K=2 and P between 1 and 48. 
+
+Slide 18 : 
+This figure shows the Speedup. We can see that the first part is very similar to 
+experiment 
+
+Slide 19 : 
+In the next part, I tried to see the effect of some changes on the communication overhead 
+
+Slide 20 : 
+The first change was to merge the two communication operations into one unique commmunication
+overhead. This makes it possible to divide the setup time by 2. In that case, the algorithm will compute the cost of the previous iteration and 
+therefore it will add an iteration to the algorithm. 
+
+Slide 21 : 
+The result is shown in this figure, as we can see the modification has increased the speed up a litte bit. 
+
+Slide 22 : 
+The second modification is to limit the communication to one iteration out of two. In that case, the algorithm will
+compute only the local centroid in one iteration out of two. Like the first modification, this algorithm
+will add some iterations to the algorithm. 
+
+Slide 23 : 
+This figure shows the speedup for the original version, the first modification and the second modification . 
+As we can see all the curves have the same shape. Modification made it possible to increase the speedup and even 
+to dampen the fall. 
+
+Slide 24 : 
+But we should be careful with these results. These results arenot valid for a large input. Otherwise the results are quiet the opposite
+since as I said, the modifications will add some iterations and if  N is very large the computaion time added in these iterations 
+will greater than the time saved in the communication. 
+
+Slide 26 : 
+To conclude, we can say that the Kmeans algorithm scales generally well. And in the case of a worse network or a small input compared to 
+the number of processes we can modify the algorithm to make the algorithm make more performant. 
+
+
+
+
+
