@@ -1,8 +1,8 @@
-# Presentation :
+# Presentation:
 The aim of this project is to parallelize the K-means algorithm using the MPI library and to study the performances of this parallelization.
 
 # Files:
-The project consists of 4 code files which are :
+The project consists of 4 code files which are:
 	- ProjectS.c : The classical Serial Program
 	- Project.c : The first Parallel program
 	- Project2.c : The modified version of the parallel program (2 recursive doubling merged)
